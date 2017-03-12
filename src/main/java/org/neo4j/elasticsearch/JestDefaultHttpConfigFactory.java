@@ -26,6 +26,7 @@ public class JestDefaultHttpConfigFactory {
       .discoveryFrequency(1L, TimeUnit.MINUTES)
       .sslSocketFactory(getSyncHttpsHandler())
       .httpsIOSessionStrategy(getAsyncHttpsHandler())
+      .readTimeout(60000)
       .build();
   }
 
