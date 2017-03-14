@@ -1,5 +1,6 @@
 package org.neo4j.elasticsearch;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 
@@ -19,11 +20,12 @@ public class ElasticSearchExtension extends LifecycleAdapter {
     private final static Logger logger = Logger.getLogger(ElasticSearchExtension.class.getName());
     private final String hostName;
     private boolean enabled = true;
+    private final boolean discovery;
     private ElasticSearchEventHandler handler;
     private JestClient client;
     private ElasticSearchIndexSettings indexSettings;
 
-    public ElasticSearchExtension(GraphDatabaseService gds, String hostName, String indexSpec, Boolean includeIDField, Boolean includeLabelsField) {
+    public ElasticSearchExtension(GraphDatabaseService gds, String hostName, String indexSpec, Boolean discovery, Boolean includeIDField, Boolean includeLabelsField) {
         Map iSpec;
         try {
             iSpec = ElasticSearchIndexSpecParser.parseIndexSpec(indexSpec);
@@ -39,13 +41,14 @@ public class ElasticSearchExtension extends LifecycleAdapter {
         logger.info("Elasticsearch Integration: Running " + hostName + " - " + indexSpec);
         this.gds = gds;
         this.hostName = hostName;
+        this.discovery = discovery;
     }
 
     @Override
     public void init() throws Throwable {
         if (!enabled) return;
 
-        client = getJestClient(hostName);
+        client = getJestClient(hostName, discovery);
         handler = new ElasticSearchEventHandler(client, indexSettings);
         gds.registerTransactionEventHandler(handler);
         logger.info("Connecting to ElasticSearch");
@@ -59,9 +62,9 @@ public class ElasticSearchExtension extends LifecycleAdapter {
         logger.info("Disconnected from ElasticSearch");
     }
 
-    private JestClient getJestClient(final String hostName) throws Throwable {
+    private JestClient getJestClient(final String hostName, final Boolean discovery) throws Throwable {
       JestClientFactory factory = new JestClientFactory();
-      factory.setHttpClientConfig(JestDefaultHttpConfigFactory.getConfigFor(hostName));
+      factory.setHttpClientConfig(JestDefaultHttpConfigFactory.getConfigFor(hostName, discovery));
       return factory.getObject();
     }
 }
