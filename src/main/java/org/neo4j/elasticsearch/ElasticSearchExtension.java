@@ -1,6 +1,5 @@
 package org.neo4j.elasticsearch;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 
